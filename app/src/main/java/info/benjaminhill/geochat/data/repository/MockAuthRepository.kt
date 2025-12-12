@@ -26,7 +26,7 @@ import javax.inject.Singleton
 class MockAuthRepository @Inject constructor() : AuthRepository {
     private val fakeUser = User("user_123", "Demo User")
 
-    override fun getCurrentUser(): User? {
+    override fun getCurrentUser(): User {
         return fakeUser
     }
 }

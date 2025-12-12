@@ -88,9 +88,11 @@ fun RadarFeedScreen(
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
 
             Column(Modifier.fillMaxSize()) {
                 // Info Bar

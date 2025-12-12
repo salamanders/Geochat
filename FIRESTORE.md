@@ -1,10 +1,12 @@
 # Firestore Setup & Integration Guide
 
-This guide provides step-by-step instructions to set up the Firebase backend for **geochat** and integrate it into the Android project.
+This guide provides step-by-step instructions to set up the Firebase backend for **geochat** and
+integrate it into the Android project.
 
 ## **Part 1: Firebase Console Setup**
 
 ### **1. Create a Firebase Project**
+
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
 2. Click **Add project**.
 3. Name it **geochat** (or similar).
@@ -12,23 +14,25 @@ This guide provides step-by-step instructions to set up the Firebase backend for
 5. Click **Create project**.
 
 ### **2. Add the Android App**
+
 1. In the project overview, click the **Android icon** (bugdroid) to add an app.
 2. **Android package name**: `info.benjaminhill.geochat` (Matches `app/build.gradle.kts`).
 3. **App nickname**: geochat.
 4. **Debug signing certificate SHA-1**:
-   - You can get this from Android Studio or the command line.
-   - **Command Line (Mac/Linux):**
-     ```bash
-     keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-     ```
-   - **Command Line (Windows):**
-     ```cmd
-     keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
-     ```
-   - Copy the `SHA1` string (e.g., `DA:39:A3:EE:5E...`) and paste it into the Firebase console.
+    - You can get this from Android Studio or the command line.
+    - **Command Line (Mac/Linux):**
+      ```bash
+      keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+      ```
+    - **Command Line (Windows):**
+      ```cmd
+      keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+      ```
+    - Copy the `SHA1` string (e.g., `DA:39:A3:EE:5E...`) and paste it into the Firebase console.
 5. Click **Register app**.
 
 ### **3. Download Config File**
+
 1. Download the `google-services.json` file.
 2. Move this file into the `app/` directory of the project: `geochat/app/google-services.json`.
 3. Click **Next** in the console until you finish the wizard.
@@ -37,7 +41,8 @@ This guide provides step-by-step instructions to set up the Firebase backend for
 
 ## **Part 2: Authentication Setup**
 
-To ensure security rules function correctly (`request.auth != null`), we will enable Anonymous Authentication.
+To ensure security rules function correctly (`request.auth != null`), we will enable Anonymous
+Authentication.
 
 1. In the Firebase Console, go to **Build** > **Authentication**.
 2. Click **Get started**.
@@ -50,6 +55,7 @@ To ensure security rules function correctly (`request.auth != null`), we will en
 ## **Part 3: Firestore Database Setup**
 
 ### **1. Create Database**
+
 1. In the Firebase Console, go to **Build** > **Firestore Database**.
 2. Click **Create database**.
 3. Select **Production mode** (we will apply our own rules).
@@ -58,8 +64,10 @@ To ensure security rules function correctly (`request.auth != null`), we will en
 6. Click **Enable**.
 
 ### **2. Security Rules**
+
 1. Go to the **Rules** tab in Firestore.
-2. Replace the existing rules with the following. These rules enforce the schema defined in `GEMINI.md` and ensure only authenticated users can read/write.
+2. Replace the existing rules with the following. These rules enforce the schema defined in
+   `GEMINI.md` and ensure only authenticated users can read/write.
 
 ```javascript
 rules_version = '2';
@@ -96,11 +104,16 @@ service cloud.firestore {
   }
 }
 ```
+
 3. Click **Publish**.
 
 ### **3. Indexes**
-Firestore automatically creates single-field indexes. For Geo queries (filtering by `geohash` range and potentially sorting by other fields), specific composite indexes might be needed later.
-* If the app crashes with a "Need Index" error log, simply **click the link in the Logcat error**. It will take you directly to the Firebase Console page to create the exact index needed.
+
+Firestore automatically creates single-field indexes. For Geo queries (filtering by `geohash` range
+and potentially sorting by other fields), specific composite indexes might be needed later.
+
+* If the app crashes with a "Need Index" error log, simply **click the link in the Logcat error**.
+  It will take you directly to the Firebase Console page to create the exact index needed.
 
 ---
 
@@ -109,6 +122,7 @@ Firestore automatically creates single-field indexes. For Geo queries (filtering
 You (or the developer) need to update the dependencies to include Firebase.
 
 ### **1. Update `gradle/libs.versions.toml`**
+
 Add the Firebase BOM and libraries to the version catalog.
 
 ```toml
@@ -130,9 +144,12 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 ```
 
 ### **2. Update `build.gradle.kts` (Project Level)**
-*Note: In modern Gradle setups, the root build file often just has an alias to plugins if using `plugins {}` block. Ensure the google-services plugin is available.*
+
+*Note: In modern Gradle setups, the root build file often just has an alias to plugins if
+using `plugins {}` block. Ensure the google-services plugin is available.*
 
 ### **3. Update `app/build.gradle.kts` (App Level)**
+
 Apply the Google Services plugin and add dependencies.
 
 ```kotlin
@@ -155,6 +172,7 @@ dependencies {
 ```
 
 ### **4. Sync Gradle**
+
 Click **Sync Now** in Android Studio.
 
 ---
@@ -162,11 +180,14 @@ Click **Sync Now** in Android Studio.
 ## **Part 5: Next Steps (Implementation)**
 
 Once the environment is set up:
-1.  **Dependency Injection (Hilt):** Create a `FirebaseModule` to provide `FirebaseAuth` and `FirebaseFirestore` instances.
-2.  **Auth Implementation:** In `MainActivity` or a startup logic, sign in anonymously:
-    ```kotlin
-    FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener {
-        Log.d("Auth", "Signed in as ${it.user?.uid}")
-    }
-    ```
-3.  **Repository Switch:** Replace `MockPostRepository` with a real implementation that queries Firestore using `GeoFireUtils` bounds.
+
+1. **Dependency Injection (Hilt):** Create a `FirebaseModule` to provide `FirebaseAuth` and
+   `FirebaseFirestore` instances.
+2. **Auth Implementation:** In `MainActivity` or a startup logic, sign in anonymously:
+   ```kotlin
+   FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener {
+       Log.d("Auth", "Signed in as ${it.user?.uid}")
+   }
+   ```
+3. **Repository Switch:** Replace `MockPostRepository` with a real implementation that queries
+   Firestore using `GeoFireUtils` bounds.
